@@ -1,0 +1,126 @@
+﻿@page "/"
+@inject IRepository repository
+@inject HttpClient Http
+@using global::Shared.Dtos;
+
+<PageTitle>Alquiler</PageTitle>
+<h1 class="mb-4">Alquiler</h1>
+
+@if (detallesFiltrados == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else
+{
+
+    <div class="d-flex align-items-end mb-3">
+        <div class="me-3">
+            <label for="fechaInicio" class="form-label">Fecha Inicio</label>
+            <input type="date" id="fechaInicio" @bind="fechaInicio" class="form-control form-control-sm w-auto" />
+        </div>
+        <div class="me-3">
+            <label for="fechaFin" class="form-label">Fecha Fin</label>
+            <input type="date" id="fechaFin" @bind="fechaFin" class="form-control form-control-sm w-auto" />
+        </div>
+        <div>
+            <button class="btn btn-primary btn-sm" @onclick="Filtrar">Filtrar</button>
+        </div>
+    </div>
+   
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Cédula</th>
+                    <th>Nombre</th>
+                    <th>Fecha de  Alquiler</th>
+                    <th>Tiempo Alquilado</th>
+                    <th>Saldo</th>
+                    <th>Marca</th>
+                    <th>Placa</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var detalle in PaginatedData)
+                {
+                    <tr>
+                        <td>@detalle.Cedula</td>
+                        <td>@detalle.Nombre</td>
+                        <td>@detalle.FechaAlquiler.ToString("yyyy-MM-dd")</td>
+                        <td>@detalle.TiempoAlquiler</td>
+                        <td>@detalle.Saldo.ToString("C", new System.Globalization.CultureInfo("es-CO"))</td>
+                        <td>@detalle.Marca</td>
+                        <td>@detalle.Placa</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <button class="btn btn-secondary btn-sm" @onclick="PreviousPage" disabled="@IsFirstPage">Anterior</button>
+        <span>Página @CurrentPage de @TotalPages</span>
+        <button class="btn btn-secondary btn-sm" @onclick="NextPage" disabled="@IsLastPage">Siguiente</button>
+    </div>
+
+ 
+}
+@code {
+    public List<DetalleAlquilerDto> detallesAlquiler { get; set; } = new();
+    public List<DetalleAlquilerDto> detallesFiltrados { get; set; } = new();
+    public DateTime? fechaInicio { get; set; }
+    public DateTime? fechaFin { get; set; }
+
+    private int CurrentPage { get; set; } = 1;
+    private int PageSize { get; set; } = 5;
+    private int TotalPages => (int)Math.Ceiling((double)detallesFiltrados.Count / PageSize);
+
+    private bool IsFirstPage => CurrentPage == 1;
+    private bool IsLastPage => CurrentPage == TotalPages;
+
+    private List<DetalleAlquilerDto> PaginatedData => detallesFiltrados.Skip((CurrentPage - 1) * PageSize).Take(PageSize).ToList();
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+       
+        var responseHttp = await repository.Get<List<DetalleAlquilerDto>>("/api/Alquiler/detalleAlquiler");
+        detallesAlquiler = responseHttp.Response;
+        detallesFiltrados = detallesAlquiler;
+        
+      
+         
+    }
+    private void Filtrar()
+    {
+        if (fechaInicio.HasValue && fechaFin.HasValue)
+        {
+            detallesFiltrados = detallesAlquiler
+                .Where(d => d.FechaAlquiler.Date >= fechaInicio.Value.Date && d.FechaAlquiler.Date <= fechaFin.Value.Date)
+                .ToList();
+        }
+        else
+        {
+            detallesFiltrados = detallesAlquiler; 
+        }
+    }
+
+    private void PreviousPage()
+    {
+        if (CurrentPage > 1)
+        {
+            CurrentPage--;
+        }
+    }
+
+    private void NextPage()
+    {
+        if (CurrentPage < TotalPages)
+        {
+            CurrentPage++;
+        }
+    }
+
+  
+}

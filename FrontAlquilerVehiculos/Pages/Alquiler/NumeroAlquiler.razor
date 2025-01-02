@@ -1,0 +1,73 @@
+﻿@page "/alquileres"
+@inject IRepository repository
+@inject HttpClient Http
+@using global::Shared.Dtos;
+
+
+<h3>Estadísticas de Alquileres por Día y Mes</h3>
+
+ <div class="row">
+    <div class="col-md-5">
+        <h3>Alquileres por Mes</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Mes</th>
+                    <th>Total Alquileres</th>
+                </tr>
+            </thead>
+          @foreach (var alquileres in alquileresPorMeses)
+                {
+                    <tr>
+                        <td>@alquileres.Mes</td>
+                        <td>@alquileres.Cantidad</td>
+                     
+                    </tr>
+                }
+        </table>
+    </div>
+
+    <div class="col-md-5">
+        <h3>Alquileres por Día</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Total Alquileres</th>
+                </tr>
+            </thead>
+       @foreach (var alquileres in alquileresPorDias)
+                {
+                    <tr>
+                        <td>@alquileres.Dia.ToString("yyyy-MM-dd")</td>
+                        <td>@alquileres.Cantidad</td>
+                     
+                    </tr>
+                }
+        </table>
+    </div>
+</div>
+
+
+
+@code {
+   
+        public List<AlquileresPorDiaDto> alquileresPorDias { get; set; } = new();
+         public List<AlquileresPorMesDto> alquileresPorMeses { get; set; } = new();
+    protected override async Task OnInitializedAsync()
+    {
+
+        var responseHttp = await repository.Get<List<AlquileresPorDiaDto>>("/api/Alquiler/alquilerPorDia");
+        alquileresPorDias = responseHttp.Response;
+
+         var responseHttp2 = await repository.Get<List<AlquileresPorMesDto>>("/api/Alquiler/alquilerPorMes");
+        alquileresPorMeses = responseHttp2.Response;
+
+
+        
+        
+
+
+
+    }
+}

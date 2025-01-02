@@ -1,0 +1,124 @@
+﻿@page "/fetchdata"
+@inject IRepository repository
+@inject HttpClient Http
+@using global::Shared.Dtos;
+@using global::Shared.Models;
+
+<PageTitle>Alquiler</PageTitle>
+<h1>Alquiler</h1>
+
+@if (carros == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Modelo</th>
+                <th>Placa</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var carro in carros)
+            {
+                <tr>
+                    <td>@carro.Modelo</td>
+                    <td>@carro.Placa</td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+
+
+
+    public List<CarroDto>? carros { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        
+        //var responseHttp = await repository.Get<List<Carro>>("WeatherForecast");
+        //Carros = responseHttp.Response;
+
+
+        try
+        {
+            carros = await Http.GetFromJsonAsync<List<CarroDto>>("/WeatherForecast/todos");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+
+}
+
+
+
+
+@*@page "/fetchdata"
+@inject HttpClient Http
+
+<PageTitle>Weather forecast</PageTitle>
+
+<h1>Weather forecast</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+@if (forecasts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Temp. (C)</th>
+                <th>Temp. (F)</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in forecasts)
+            {
+                <tr>
+                    <td>@forecast.Date.ToShortDateString()</td>
+                    <td>@forecast.TemperatureC</td>
+                    <td>@forecast.TemperatureF</td>
+                    <td>@forecast.Summary</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private WeatherForecast[]? forecasts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
+    }
+
+    public class WeatherForecast
+    {
+        public DateOnly Date { get; set; }
+
+        public int TemperatureC { get; set; }
+
+        public string? Summary { get; set; }
+
+        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    }
+}
+*@

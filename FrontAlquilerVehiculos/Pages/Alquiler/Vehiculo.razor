@@ -1,0 +1,58 @@
+﻿@page "/vehiculos"
+@inject IRepository repository
+@inject HttpClient Http
+@using global::Shared.Dtos;
+
+<h3>Autos</h3>
+
+@if (carros ==null)
+{
+    <p><em>Cargando...</em></p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                   
+                    <th>Marca</th>
+                    <th>Placa</th>
+                    <th>Modelo</th>
+                    <th>Costo</th>
+                    <th>Disponible</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var detalle in carros)
+                {
+                    <tr>
+                        
+                        <td>@detalle.Marca</td>
+                        <td>@detalle.Placa</td>
+                        <td>@detalle.Modelo</td>
+                        <td>@detalle.Costo</td>
+                        <td>@(detalle.Disponible ? "Sí" : "No")</td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+
+
+    public List<CarroDto> carros { get; set; } = new();
+    protected override async Task OnInitializedAsync()
+    {
+
+        var responseHttp = await repository.Get<List<CarroDto>>("/api/Alquiler/vehiculos");
+        carros = responseHttp.Response;
+        
+
+
+
+    }
+}
